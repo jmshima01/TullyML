@@ -6,8 +6,8 @@ from matplotlib import pyplot as plt
 import scipy.io
 from sklearn.model_selection import train_test_split
 
-# from keras.models import Sequential
-# from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+from keras.models import Sequential
+from keras.layers import Conv1D, MaxPooling1D, Dense, Flatten,Conv2D,MaxPooling2D
 
 '''
 Helo ML Classification (CNN)
@@ -292,7 +292,21 @@ if __name__ == "__main__":
     print(X_train.shape)
     print(y_train.shape)
 
-    
+    CNN = Sequential()
+
+    CNN.add(Conv1D(filters=32, kernel_size=3, activation='relu', input_shape=(3, 20)))
+    CNN.add(MaxPooling1D(pool_size=5))
+    CNN.add(Flatten())
+    CNN.add(Dense(32, activation='relu'))
+    CNN.add(Dense(units=5, activation='softmax'))
+    CNN.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    CNN.fit(X_train, y_train, batch_size=32, epochs=10, validation_data=(X_test, y_test))
+    score = CNN.evaluate(X_test, y_test)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+
+
+
 
 
         
@@ -319,14 +333,3 @@ if __name__ == "__main__":
     # bench_vx_dyn = simpsons_rule(bench_ax_dyn,curl_time,leaky_coeff=alpha)
     # bench_vy_dyn = simpsons_rule(bench_ay_dyn,curl_time,leaky_coeff=alpha)
     # bench_vz_dyn = simpsons_rule(bench_az_dyn,curl_time,leaky_coeff=alpha)
-
-
-
-    
-    
-    
-
-
-        
-        
-
