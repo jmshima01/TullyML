@@ -323,10 +323,10 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.2)
     # X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-    # savemat('X_train.mat', {'X_train': X_train})
-    # savemat('y_train.mat', {'y_train': y_train})
+    savemat('X_train.mat', {'X_train': X_train})
+    savemat('y_train.mat', {'y_train': y_train})
     savemat('X_test.mat', {'X_test': X_test})
-    # savemat('y_test.mat', {'y_test': y_train})
+    savemat('y_test.mat', {'y_test': y_test})
 
     print(X_train.shape)
     print(y_train.shape)
@@ -336,38 +336,38 @@ if __name__ == "__main__":
 
     # print(y_train[0])
 
-    CNN = Sequential()
+    # CNN = Sequential()
 
-    CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
-    CNN.add(BatchNormalization())
-    CNN.add(Activation("relu"))
-    CNN.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 2)))
+    # CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
+    # CNN.add(BatchNormalization())
+    # CNN.add(Activation("relu"))
+    # CNN.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 2)))
 
-    CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
-    CNN.add(BatchNormalization())
-    CNN.add(Activation("relu"))
-    CNN.add(MaxPooling2D(pool_size=(1, 4), strides=(1, 4)))
+    # CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
+    # CNN.add(BatchNormalization())
+    # CNN.add(Activation("relu"))
+    # CNN.add(MaxPooling2D(pool_size=(1, 4), strides=(1, 4)))
 
-    CNN.add(Conv2D(filters=8, kernel_size=(2,3),padding='same'))
-    CNN.add(BatchNormalization())
-    CNN.add(Activation("relu"))
-    CNN.add(MaxPooling2D(pool_size=(3, 2), strides=(1, 2)))
+    # CNN.add(Conv2D(filters=8, kernel_size=(2,3),padding='same'))
+    # CNN.add(BatchNormalization())
+    # CNN.add(Activation("relu"))
+    # CNN.add(MaxPooling2D(pool_size=(3, 2), strides=(1, 2)))
 
-    CNN.add(Flatten())
-    CNN.add(Dense(units=16))
-    CNN.add(Activation("relu"))
-    CNN.add(Dropout(rate=0.5))
+    # CNN.add(Flatten())
+    # CNN.add(Dense(units=16))
+    # CNN.add(Activation("relu"))
+    # CNN.add(Dropout(rate=0.5))
 
-    num_classes = 5
-    CNN.add(Dense(units=num_classes))
+    # num_classes = 5
+    # CNN.add(Dense(units=num_classes))
     
-    CNN.add(Activation("softmax"))
+    # CNN.add(Activation("softmax"))
 
     
-    CNN.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=2e-3), metrics=['accuracy'])
-    CNN.fit(X_train, y_train, batch_size=16, epochs=20, validation_data=(X_test, y_test),callbacks=[LearningRateScheduler(scheduler)])
-    score = CNN.evaluate(X_test, y_test)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
+    # CNN.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=2e-3), metrics=['accuracy'])
+    # CNN.fit(X_train, y_train, batch_size=16, epochs=20, validation_data=(X_test, y_test),callbacks=[LearningRateScheduler(scheduler)])
+    # score = CNN.evaluate(X_test, y_test)
+    # print('Test loss:', score[0])
+    # print('Test accuracy:', score[1])
     # print(CNN.summary())
     #plot_model(CNN, to_file='model.png', show_shapes=True, show_layer_names=True)
