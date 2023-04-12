@@ -5,9 +5,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import scipy.io
 from sklearn.model_selection import train_test_split
-
+from keras.utils import to_categorical, plot_model
 from keras.models import Sequential
-from keras.layers import Conv1D, MaxPooling1D, Dense, Flatten,Conv2D,MaxPooling2D
+from keras.layers import Conv1D, MaxPooling1D, Dense, Flatten,Conv2D,MaxPooling2D,BatchNormalization,Activation,Dropout
+from keras.optimizers import Adam
+from keras.callbacks import LearningRateScheduler
+from tensorflow import math as tfm
+from scipy.io import savemat
+
+
 
 '''
 Helo ML Classification (CNN)
@@ -25,6 +31,13 @@ CLASSES:
 class_labels = {0:"Bench", 1:"Curl", 2:"Squat", 3:"Overhead Press", 4:"Deadlift"}
 
 # ============== Helper Functions ==================
+def scheduler(epoch, lr):
+    if epoch < 10:
+        return lr
+    else:
+        return lr * tfm.exp(-0.1)
+
+
 def dc_block(dataset, time, init_coeff=None, fc=0.1):
     Ts = np.mean(np.diff(time))
     fs = 1/Ts
@@ -279,76 +292,82 @@ if __name__ == "__main__":
 
     y_labels = []
     
+    
+
     y_labels.append(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[1])
     bench_atrain = parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[0]
 
-    y_labels.append(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=0)[1])
-    curl_atrain = parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=0)[1]
+    y_labels.append(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=1)[1])
+    curl_atrain = parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=1)[0]
 
-    y_labels.append(parse_data(s_ax_dyn,s_ay_dyn,s_az_dyn,class_ind=0)[1])
-    squat_atrain = parse_data(s_ax_dyn,s_ay_dyn,s_az_dyn,class_ind=0)[0]
+    y_labels.append(parse_data(s_ax_dyn,s_ay_dyn,s_az_dyn,class_ind=2)[1])
+    squat_atrain = parse_data(s_ax_dyn,s_ay_dyn,s_az_dyn,class_ind=2)[0]
 
-    y_labels.append(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=0)[1])
-    overhead_atrain = parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=0)[0]
+    y_labels.append(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=3)[1])
+    overhead_atrain = parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=3)[0]
 
-    y_labels.append(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=0)[1])
-    deadlift_atrain = parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=0)[0].reshape()
+    y_labels.append(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[1])
+    deadlift_atrain = parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[0]
 
     flatten = []
     for arr in y_labels:
         for i in arr:
             flatten.append(i)
     
-    X_tensor = np.hstack((bench_atrain, curl_atrain, squat_atrain, overhead_atrain, deadlift_atrain))
-    y_labels = np.array(flatten)
-    print(y_labels.shape)
+    X_tensor = np.expand_dims(np.concatenate((bench_atrain, curl_atrain, squat_atrain, overhead_atrain, deadlift_atrain),axis=0),3)
+    y_labels = to_categorical(np.array(flatten))
+    print(y_labels)
     print(X_tensor.shape)
 
     
-    # X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.3)
+    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.2)
     # X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-    # print(X_train.shape)
-    # print(y_train.shape)
+    savemat('X_train.mat', {'X_train': X_train})
+    savemat('y_train.mat', {'y_train': y_train})
+    savemat('X_test.mat', {'X_test': X_train})
+    savemat('y_test.mat', {'y_test': y_train})
+
+    print(X_train.shape)
+    print(y_train.shape)
+
+    
+    
+
+    # print(y_train[0])
 
     CNN = Sequential()
 
-    CNN.add(Conv1D(filters=32, kernel_size=3, activation='relu', input_shape=(3, 20)))
-    CNN.add(MaxPooling1D(pool_size=5))
+    CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
+    CNN.add(BatchNormalization())
+    CNN.add(Activation("relu"))
+    CNN.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 2)))
+
+    CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
+    CNN.add(BatchNormalization())
+    CNN.add(Activation("relu"))
+    CNN.add(MaxPooling2D(pool_size=(1, 4), strides=(1, 4)))
+
+    CNN.add(Conv2D(filters=8, kernel_size=(2,3),padding='same'))
+    CNN.add(BatchNormalization())
+    CNN.add(Activation("relu"))
+    CNN.add(MaxPooling2D(pool_size=(3, 2), strides=(1, 2)))
+
     CNN.add(Flatten())
-    CNN.add(Dense(32, activation='relu'))
-    CNN.add(Dense(units=5, activation='softmax'))
-    CNN.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    CNN.fit(X_train, y_train, batch_size=32, epochs=10, validation_data=(X_test, y_test))
+    CNN.add(Dense(units=16))
+    CNN.add(Activation("relu"))
+    CNN.add(Dropout(rate=0.5))
+
+    num_classes = 5
+    CNN.add(Dense(units=num_classes))
+    
+    CNN.add(Activation("softmax"))
+
+    
+    CNN.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=2e-3), metrics=['accuracy'])
+    CNN.fit(X_train, y_train, batch_size=16, epochs=20, validation_data=(X_test, y_test),callbacks=[LearningRateScheduler(scheduler)])
     score = CNN.evaluate(X_test, y_test)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-
-
-
-
-
-        
-
-    # :::::::: POSITION ::::::::::::
-
-    # curl_vx_dyn = simpsons_rule(curl_ax_dyn,curl_time,leaky_coeff=alpha)
-    # curl_vy_dyn = simpsons_rule(curl_ay_dyn,curl_time,leaky_coeff=alpha)
-    # curl_vz_dyn = simpsons_rule(curl_az_dyn,curl_time,leaky_coeff=alpha)
-
-    # deadlift_vx_dyn = simpsons_rule(deadlift_ax_dyn,curl_time,leaky_coeff=alpha)
-    # deadlift_vy_dyn = simpsons_rule(deadlift_ay_dyn,curl_time,leaky_coeff=alpha)
-    # deadlift_vx_dyn = simpsons_rule(deadlift_az_dyn,curl_time,leaky_coeff=alpha)
-
-
-    # squat_vx_dyn = simpsons_rule(squat_ax_dyn,curl_time,leaky_coeff=alpha)
-    # squat_vy_dyn = simpsons_rule(squat_ay_dyn,curl_time,leaky_coeff=alpha)
-    # squat_vz_dyn = simpsons_rule(squat_az_dyn,curl_time,leaky_coeff=alpha)
-
-    # overhead_vx_dyn = simpsons_rule(overhead_ax_dyn,curl_time,leaky_coeff=alpha)
-    # overhead_vy_dyn = simpsons_rule(overhead_ay_dyn,curl_time,leaky_coeff=alpha)
-    # overhead_vz_dyn = simpsons_rule(overhead_az_dyn,curl_time,leaky_coeff=alpha)
-
-    # bench_vx_dyn = simpsons_rule(bench_ax_dyn,curl_time,leaky_coeff=alpha)
-    # bench_vy_dyn = simpsons_rule(bench_ay_dyn,curl_time,leaky_coeff=alpha)
-    # bench_vz_dyn = simpsons_rule(bench_az_dyn,curl_time,leaky_coeff=alpha)
+    # print(CNN.summary())
+    #plot_model(CNN, to_file='model.png', show_shapes=True, show_layer_names=True)
