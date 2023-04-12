@@ -323,10 +323,10 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.2)
     # X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-    savemat('X_train.mat', {'X_train': X_train})
-    savemat('y_train.mat', {'y_train': y_train})
-    savemat('X_test.mat', {'X_test': X_train})
-    savemat('y_test.mat', {'y_test': y_train})
+    # savemat('X_train.mat', {'X_train': X_train})
+    # savemat('y_train.mat', {'y_train': y_train})
+    savemat('X_test.mat', {'X_test': X_test})
+    # savemat('y_test.mat', {'y_test': y_train})
 
     print(X_train.shape)
     print(y_train.shape)
