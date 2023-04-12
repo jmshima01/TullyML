@@ -42,7 +42,7 @@ def dc_block(dataset, time, init_coeff=None, fc=0.1):
     for i in range(1,len(dataset)):
         y[i] = ACC_ALPHA*y[i-1] + x_diff[i-1]
     
-    return y
+    return list(y)
 
 
 
@@ -67,21 +67,17 @@ def make_matrix(x_slice, y_slice, z_slice):
     return np.vstack((x_slice, y_slice, z_slice))
 
 
-def parse_data(x_data, y_data, z_data, class_ind, parse_size=20):
+def parse_data(x_data, y_data, z_data, class_ind):
     parsed = []
-    skip = 1
-    
-    length = x_data.size
-    while(length%parse_size!=0):
-        length-=1
-    print(length)
     labels = []
-    for i in range(0,length-parse_size,parse_size):
-        #if(skip == 1):
+    parse_size=80 
+    parse_overlap=80-64
+    
+    length = len(list(x_data))-parse_size
+    for i in range(0,length,parse_overlap):
         parsed.append(make_matrix(x_data[i:i+parse_size],y_data[i:i+parse_size],z_data[i:i+parse_size]))
+        #print(parsed)
         labels.append(class_ind)
-
-        skip ^= 1
     
     return np.array(parsed),np.array(labels)
     
@@ -172,6 +168,29 @@ if __name__ == "__main__":
     squat_ay_dyn = dc_block(squat_yacc,squat_time)
     squat_az_dyn = dc_block(squat_zacc,squat_time)
 
+    
+    # TAKE OUT empty start/end...
+    c_ax_dyn = np.array(curl_ax_dyn[:4100])
+    c_ay_dyn = np.array(curl_ax_dyn[:4100])
+    c_az_dyn = np.array(curl_ax_dyn[:4100])
+    
+    b_ax_dyn = np.array(bench_ax_dyn[1200:3450])
+    b_ay_dyn = np.array(bench_ay_dyn[1200:3450])
+    b_az_dyn = np.array(bench_az_dyn[1200:3450])
+
+    o_ax_dyn = np.array(overhead_ax_dyn[1280:4200])
+    o_ay_dyn = np.array(overhead_ax_dyn[1280:4200])
+    o_az_dyn = np.array(overhead_ax_dyn[1280:4200])
+
+    d_ax_dyn = np.array(deadlift_ax_dyn[1420:4500])
+    d_ay_dyn = np.array(deadlift_ax_dyn[1420:4500])
+    d_az_dyn = np.array(deadlift_ax_dyn[1420:4500])
+
+    s_ax_dyn = np.array(squat_ax_dyn[749:2849])
+    s_ay_dyn = np.array(squat_ax_dyn[749:2849])
+    s_az_dyn = np.array(squat_ax_dyn[749:2849])
+
+    print(s_ax_dyn.shape)
 
     #PLOTTING...
     # plt.plot(curl_time,curl_ax_dyn)
@@ -235,62 +254,62 @@ if __name__ == "__main__":
     bench_vz_dyn = simpsons_rule(bench_az_dyn,curl_time,leaky_coeff=alpha)
 
 
-    print(bench_vx_dyn.size)
-    print(squat_vx_dyn.size)
-    print(overhead_vx_dyn.size)
-    print(curl_vx_dyn.size)
-    print(deadlift_vx_dyn.size)
+    # print(bench_vx_dyn.size)
+    # print(squat_vx_dyn.size)
+    # print(overhead_vx_dyn.size)
+    # print(curl_vx_dyn.size)
+    # print(deadlift_vx_dyn.size)
     print()
 
     # class_labels = {0:"Bench", 1:"Curl", 2:"Squat", 3:"Overhead Press", 4:"Deadlift"}
-    # print(parse_data(bench_vx_dyn,bench_vy_dyn,bench_vz_dyn,class_ind=0)[1].shape)
-    # print(parse_data(bench_vx_dyn,bench_vy_dyn,bench_vz_dyn,class_ind=0)[0].shape)
+    print(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[1].shape)
+    print(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[0].shape)
 
-    # print(parse_data(deadlift_vx_dyn,deadlift_vy_dyn,deadlift_vz_dyn,class_ind=4)[1].shape)
-    # print(parse_data(deadlift_vx_dyn,deadlift_vy_dyn,deadlift_vz_dyn,class_ind=4)[0].shape)
+    print(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[1].shape)
+    print(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[0].shape)
 
-    # print(parse_data(squat_vx_dyn,squat_vy_dyn,squat_vz_dyn,class_ind=4)[1].shape)
-    # print(parse_data(squat_vx_dyn,squat_vy_dyn,squat_vz_dyn,class_ind=4)[0].shape)
+    print(parse_data(s_ax_dyn,squat_ay_dyn,s_az_dyn,class_ind=4)[1].shape)
+    print(parse_data(s_ax_dyn,squat_ay_dyn,s_az_dyn,class_ind=4)[0].shape)
 
-    # print(parse_data(curl_vx_dyn,curl_vy_dyn,curl_vz_dyn,class_ind=4)[1].shape)
-    # print(parse_data(curl_vx_dyn,curl_vy_dyn,curl_vz_dyn,class_ind=4)[0].shape)
+    print(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=4)[1].shape)
+    print(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=4)[0].shape)
 
-    # print(parse_data(overhead_vx_dyn,overhead_vy_dyn,overhead_vz_dyn,class_ind=4)[1].shape)
-    # print(parse_data(overhead_vx_dyn,overhead_vy_dyn,overhead_vz_dyn,class_ind=4)[0].shape)
+    print(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=4)[1].shape)
+    print(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=4)[0].shape)
 
     y_labels = []
     
-    y_labels.append(parse_data(bench_vx_dyn,bench_vy_dyn,bench_vz_dyn,class_ind=0)[1])
-    bench_vtrain = parse_data(bench_vx_dyn,bench_vy_dyn,bench_vz_dyn,class_ind=0)[0]
+    y_labels.append(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[1])
+    bench_atrain = parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[0]
 
-    y_labels.append(parse_data(curl_vx_dyn,curl_vy_dyn,curl_vz_dyn,class_ind=1)[1])
-    curl_vtrain = parse_data(curl_vx_dyn,curl_vy_dyn,curl_vz_dyn,class_ind=1)[0]
+    y_labels.append(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=0)[1])
+    curl_atrain = parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=0)[1]
 
-    y_labels.append(parse_data(squat_vx_dyn,squat_vy_dyn,squat_vz_dyn,class_ind=2)[1])
-    squat_vtrain = parse_data(squat_vx_dyn,squat_vy_dyn,squat_vz_dyn,class_ind=2)[0]
+    y_labels.append(parse_data(s_ax_dyn,s_ay_dyn,s_az_dyn,class_ind=0)[1])
+    squat_atrain = parse_data(s_ax_dyn,s_ay_dyn,s_az_dyn,class_ind=0)[0]
 
-    y_labels.append(parse_data(overhead_vx_dyn,overhead_vy_dyn,overhead_vz_dyn,class_ind=3)[1])
-    overhead_vtrain = parse_data(overhead_vx_dyn,overhead_vy_dyn,overhead_vz_dyn,class_ind=3)[0]
+    y_labels.append(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=0)[1])
+    overhead_atrain = parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=0)[0]
 
-    y_labels.append(parse_data(deadlift_vx_dyn,deadlift_vy_dyn,deadlift_vz_dyn,class_ind=4)[1])
-    deadlift_vtrain = parse_data(deadlift_vx_dyn,deadlift_vy_dyn,deadlift_vz_dyn,class_ind=4)[0]
+    y_labels.append(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=0)[1])
+    deadlift_atrain = parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=0)[0].reshape()
 
     flatten = []
     for arr in y_labels:
         for i in arr:
             flatten.append(i)
     
-    X_tensor = np.vstack((bench_vtrain, curl_vtrain, squat_vtrain, overhead_vtrain, deadlift_vtrain))
+    X_tensor = np.hstack((bench_atrain, curl_atrain, squat_atrain, overhead_atrain, deadlift_atrain))
     y_labels = np.array(flatten)
     print(y_labels.shape)
     print(X_tensor.shape)
 
     
-    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.3)
-    X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
+    # X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.3)
+    # X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
 
-    print(X_train.shape)
-    print(y_train.shape)
+    # print(X_train.shape)
+    # print(y_train.shape)
 
     CNN = Sequential()
 
