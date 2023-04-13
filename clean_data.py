@@ -7,12 +7,12 @@ import scipy.io
 from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical, plot_model
 from keras.models import Sequential
-from keras.layers import Conv1D, MaxPooling1D, Dense, Flatten,Conv2D,MaxPooling2D,BatchNormalization,Activation,Dropout
+from keras.layers import Conv1D, MaxPooling1D, Dense, Flatten,Conv2D,MaxPooling2D,BatchNormalization,Activation,Dropout,InputLayer
 from keras.optimizers import Adam
 from keras.callbacks import LearningRateScheduler
 from tensorflow import math as tfm
 from scipy.io import savemat
-
+from mat4py import loadmat
 
 
 '''
@@ -184,24 +184,24 @@ if __name__ == "__main__":
     
     # TAKE OUT empty start/end...
     c_ax_dyn = np.array(curl_ax_dyn[:4100])
-    c_ay_dyn = np.array(curl_ax_dyn[:4100])
-    c_az_dyn = np.array(curl_ax_dyn[:4100])
+    c_ay_dyn = np.array(curl_ay_dyn[:4100])
+    c_az_dyn = np.array(curl_az_dyn[:4100])
     
     b_ax_dyn = np.array(bench_ax_dyn[1200:3450])
     b_ay_dyn = np.array(bench_ay_dyn[1200:3450])
     b_az_dyn = np.array(bench_az_dyn[1200:3450])
 
     o_ax_dyn = np.array(overhead_ax_dyn[1280:4200])
-    o_ay_dyn = np.array(overhead_ax_dyn[1280:4200])
-    o_az_dyn = np.array(overhead_ax_dyn[1280:4200])
+    o_ay_dyn = np.array(overhead_ay_dyn[1280:4200])
+    o_az_dyn = np.array(overhead_az_dyn[1280:4200])
 
     d_ax_dyn = np.array(deadlift_ax_dyn[1420:4500])
-    d_ay_dyn = np.array(deadlift_ax_dyn[1420:4500])
-    d_az_dyn = np.array(deadlift_ax_dyn[1420:4500])
+    d_ay_dyn = np.array(deadlift_ay_dyn[1420:4500])
+    d_az_dyn = np.array(deadlift_az_dyn[1420:4500])
 
     s_ax_dyn = np.array(squat_ax_dyn[749:2849])
-    s_ay_dyn = np.array(squat_ax_dyn[749:2849])
-    s_az_dyn = np.array(squat_ax_dyn[749:2849])
+    s_ay_dyn = np.array(squat_ay_dyn[749:2849])
+    s_az_dyn = np.array(squat_az_dyn[749:2849])
 
     print(s_ax_dyn.shape)
 
@@ -275,20 +275,20 @@ if __name__ == "__main__":
     print()
 
     # class_labels = {0:"Bench", 1:"Curl", 2:"Squat", 3:"Overhead Press", 4:"Deadlift"}
-    print(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[1].shape)
-    print(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[0].shape)
+    # print(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[1].shape)
+    # print(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[0].shape)
 
-    print(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[1].shape)
-    print(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[0].shape)
+    # print(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[1].shape)
+    # print(parse_data(d_ax_dyn,d_ay_dyn,d_az_dyn,class_ind=4)[0].shape)
 
-    print(parse_data(s_ax_dyn,squat_ay_dyn,s_az_dyn,class_ind=4)[1].shape)
-    print(parse_data(s_ax_dyn,squat_ay_dyn,s_az_dyn,class_ind=4)[0].shape)
+    # print(parse_data(s_ax_dyn,squat_ay_dyn,s_az_dyn,class_ind=4)[1].shape)
+    # print(parse_data(s_ax_dyn,squat_ay_dyn,s_az_dyn,class_ind=4)[0].shape)
 
-    print(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=4)[1].shape)
-    print(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=4)[0].shape)
+    # print(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=4)[1].shape)
+    # print(parse_data(c_ax_dyn,c_ay_dyn,c_az_dyn,class_ind=4)[0].shape)
 
-    print(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=4)[1].shape)
-    print(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=4)[0].shape)
+    # print(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=4)[1].shape)
+    # print(parse_data(o_ax_dyn,o_ay_dyn,o_az_dyn,class_ind=4)[0].shape)
 
     y_labels = []
     
@@ -315,59 +315,56 @@ if __name__ == "__main__":
             flatten.append(i)
     
     X_tensor = np.expand_dims(np.concatenate((bench_atrain, curl_atrain, squat_atrain, overhead_atrain, deadlift_atrain),axis=0),3)
-    y_labels = to_categorical(np.array(flatten))
-    print(y_labels)
-    print(X_tensor.shape)
+    y_labels = to_categorical(np.array(flatten)) 
+    # print(y_labels)
+    # print(X_tensor.shape)
 
+    inds = np.random.permutation(len(X_tensor))
+
+    X_tensor = X_tensor[inds]
+    y_labels = y_labels[inds]
+
+    # print(len(X_tensor))
+    # print(X_tensor.shape)
+    # print(y_labels.shape)
+
+    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.2,shuffle=True)
+    X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
+
+
+    CNN = Sequential()
+
+    CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same',data_format="channels_last"))
+    CNN.add(BatchNormalization())
+    CNN.add(Activation("relu"))
+    CNN.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 2)))
+
+    CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
+    CNN.add(BatchNormalization())
+    CNN.add(Activation("relu"))
+    CNN.add(MaxPooling2D(pool_size=(1, 4), strides=(1, 4)))
+
+    CNN.add(Conv2D(filters=8, kernel_size=(2,3),padding='same'))
+    CNN.add(BatchNormalization())
+    CNN.add(Activation("relu"))
+    CNN.add(MaxPooling2D(pool_size=(3, 2), strides=(1, 2)))
+
+    CNN.add(Flatten())
+    CNN.add(Dense(units=16))
+    CNN.add(Activation("relu"))
+    CNN.add(Dropout(rate=0.5))
+
+    num_classes = 5
+    CNN.add(Dense(units=num_classes))
     
-    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_labels, test_size=0.2)
-    # X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)
+    CNN.add(Activation("softmax"))
 
-    savemat('X_train.mat', {'X_train': X_train})
-    savemat('y_train.mat', {'y_train': y_train})
-    savemat('X_test.mat', {'X_test': X_test})
-    savemat('y_test.mat', {'y_test': y_test})
+    CNN.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=2e-3), metrics=['accuracy'])
+    CNN.fit(X_train, y_train, batch_size=16, epochs=20, validation_data=(X_val, y_val),callbacks=[LearningRateScheduler(scheduler)])
+    score = CNN.evaluate(X_test, y_test)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+    print(CNN.summary())
+    plot_model(CNN, to_file='model.png', show_shapes=True, show_layer_names=True)
 
-    print(X_train.shape)
-    print(y_train.shape)
 
-    
-    
-
-    # print(y_train[0])
-
-    # CNN = Sequential()
-
-    # CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
-    # CNN.add(BatchNormalization())
-    # CNN.add(Activation("relu"))
-    # CNN.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 2)))
-
-    # CNN.add(Conv2D(filters=16, kernel_size=(2,3),padding='same'))
-    # CNN.add(BatchNormalization())
-    # CNN.add(Activation("relu"))
-    # CNN.add(MaxPooling2D(pool_size=(1, 4), strides=(1, 4)))
-
-    # CNN.add(Conv2D(filters=8, kernel_size=(2,3),padding='same'))
-    # CNN.add(BatchNormalization())
-    # CNN.add(Activation("relu"))
-    # CNN.add(MaxPooling2D(pool_size=(3, 2), strides=(1, 2)))
-
-    # CNN.add(Flatten())
-    # CNN.add(Dense(units=16))
-    # CNN.add(Activation("relu"))
-    # CNN.add(Dropout(rate=0.5))
-
-    # num_classes = 5
-    # CNN.add(Dense(units=num_classes))
-    
-    # CNN.add(Activation("softmax"))
-
-    
-    # CNN.compile(loss='categorical_crossentropy', optimizer=Adam(learning_rate=2e-3), metrics=['accuracy'])
-    # CNN.fit(X_train, y_train, batch_size=16, epochs=20, validation_data=(X_test, y_test),callbacks=[LearningRateScheduler(scheduler)])
-    # score = CNN.evaluate(X_test, y_test)
-    # print('Test loss:', score[0])
-    # print('Test accuracy:', score[1])
-    # print(CNN.summary())
-    #plot_model(CNN, to_file='model.png', show_shapes=True, show_layer_names=True)
