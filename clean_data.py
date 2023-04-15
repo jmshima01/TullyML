@@ -20,7 +20,7 @@ Helo ML Classification (CNN)
 @author James Shima 
 @author Jim Shima
 
-CLASSES:
+CLASSES (DATASET 1: data.json):
 1.       Bench, sFoLqgI5afw6UcfrmxZX
 2.       Barbell Curl, bkziJY2HV6G0NF0zUUqU
 3.       Back Squat, lCcTdGNrsSUCUcWFpdHh
@@ -28,6 +28,33 @@ CLASSES:
 5.       Deadlift, fZXPgJEMjxIMjz5ZxXqZ
 
 '''
+
+"""
+April7-Collection.json
+
+There were 20 collection events in timestamp order (oldest is #1, newest is #20):
+1. Blank
+2. Incline bench 135 lbs - 8 reps
+3. Incline bench 185 lbs - 8 reps
+4. Lat pull down 180 lbs - 8 reps
+5. Y-t-w 7.5 lbs - 10 ,10 , 10 for a total of 30
+6. Incline bench 195 lbs - 8 reps
+7. Lat pull down 180 lbs - 8 reps
+8. Y-t-w 7.5 - 10 ,10 , 10 for a total of 30
+9. Incline bench 205 lbs - 7 reps
+10. Lat pull down 180 lbs - 8 reps
+11. Y-t-w 7.5 lbs - 10 ,10 ,10 for a total of 40
+12. SA dumb bench 80 - 16 total reps (8 on R then 8 on L)
+13. Db front, side raise 25 lb - 10, 10 for a total of 20 (held on right)
+14. Smith BB front lift 95 lb - 10 reps
+15. SA dumb bench 80 lb - 16 total reps (8 on R then 8 on L)
+16. Db front, side raise 25 lb- 10, 10 for a total of 20 (held on right)
+17. Smith BB front lift 95lb - 10 reps
+18. 80 lb - 16 total reps (8 on R then 8 on L)
+19. Db front, side raise 25 lb - 10, 10 for a total of 20 (held on right)
+20. Smith BB front lift 95 lb- 10 reps
+
+"""
 class_labels = {0:"Bench", 1:"Curl", 2:"Squat", 3:"Overhead Press", 4:"Deadlift"}
 
 # ============== Helper Functions ==================
@@ -137,7 +164,15 @@ if __name__ == "__main__":
         bench_time -= bench_time[0] 
 
 
-        print("done reading...")
+
+
+        print("done reading data.json...")
+    
+    with open("April7-Collection.json","r+") as file:
+
+        april_data = json.load(file)
+        
+        
 
 
     #test against matlab dataset
@@ -292,8 +327,6 @@ if __name__ == "__main__":
 
     y_labels = []
     
-    
-
     y_labels.append(parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[1])
     bench_atrain = parse_data(b_ax_dyn,b_ay_dyn,b_az_dyn,class_ind=0)[0]
 
